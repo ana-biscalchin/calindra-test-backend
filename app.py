@@ -1,5 +1,6 @@
-import math
+from math import radians, sin, cos, acos
 import sys
+from api import geocoding_adress
 
 
 def main():
@@ -12,11 +13,17 @@ def menu():
     choice = int(
         input(
             """
-                O que deseja fazer?
+            A distância euclidiana representa a menor distância existente
+            entre dois objetos no plano multidimensional.
+
+            Para calcular use o menu abaixo e cadastre dois endereços
+            e depois use a opção 3 - "Calcular a distância euclidiana".
+
+            O resultado mostrará a distância em quilômetros (Km).
+
         1 - Cadastrar um endereço
         2 - Ver os endereços cadastrados
         3 - Calcular a distância euclidiana
-        4 - Aprender sobre a distância euclidiana
         0 - Sair
 
         Escolha: """
@@ -27,9 +34,7 @@ def menu():
     elif choice == 2:
         see_addresses()
     elif choice == 3:
-        euclidean_distance(x, y)
-    elif choice == 4:
-        pass
+        euclidean_distance()
     elif choice == 0:
         sys.exit
     else:
@@ -66,16 +71,29 @@ def anykey():
     menu()
 
 
-x = [-23.5673784, -46.6355207]
-y = [-23.5688483, -46.6467684]
+def transform_address_in_geocode(addresses_list):
+    geocode_list = []
+    print(addresses_list)
+    for address in addresses_list:
+        geocode = geocoding_adress(address)
+        geocode = geocode[0]["geometry"]["location"]
+
+        geocode_list.append(geocode)
+    return geocode_list
 
 
-def euclidean_distance(x, y):
+def euclidean_distance():
+    coordinates = transform_address_in_geocode(addresses_list)
 
-    a = (x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2
-    b = math.sqrt(a)
-    print(b)
-    return b
+    x_lat = radians(coordinates[0]["lat"])
+    x_lng = radians(coordinates[0]["lng"])
+    y_lat = radians(coordinates[1]["lat"])
+    y_lng = radians(coordinates[1]["lng"])
+
+    dist = 6371.01 * acos(
+        sin(x_lat) * sin(y_lat) + cos(x_lat) * cos(y_lat) * cos(x_lng - y_lng)
+    )
+    print("A distância entre os dois endereços é de %.2fkm." % dist)
 
 
 main()
